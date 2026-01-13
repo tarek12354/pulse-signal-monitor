@@ -4,7 +4,8 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
-  base: "/pulse-signal-monitor/", // هذا هو السطر الأهم لإصلاح الشاشة البيضاء
+  // تغيير القيمة إلى './' يجعل الروابط "نسبية" وتعمل تلقائياً على GitHub Pages
+  base: './', 
   server: {
     host: "::",
     port: 8080,
