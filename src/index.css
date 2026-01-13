@@ -2,27 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
 @layer base {
   :root {
     --background: 0 0% 1%;
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 4%;
+    --card: 0 0% 3%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 4%;
+    --popover: 0 0% 3%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 45 93% 53%;
+    --primary: 48 96% 53%;
     --primary-foreground: 0 0% 0%;
 
-    --secondary: 0 0% 8%;
-    --secondary-foreground: 0 0% 70%;
+    --secondary: 0 0% 6%;
+    --secondary-foreground: 0 0% 60%;
 
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 50%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 45%;
 
     --accent: 24 95% 53%;
     --accent-foreground: 0 0% 0%;
@@ -33,37 +33,33 @@
     --success: 142 76% 45%;
     --success-foreground: 0 0% 0%;
 
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 45 93% 53%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 0%;
+
+    --border: 0 0% 10%;
+    --input: 0 0% 10%;
+    --ring: 48 96% 53%;
 
     --radius: 1.5rem;
 
-    /* Custom design tokens */
-    --gauge-bg: 0 0% 7%;
-    --gauge-track: 0 0% 10%;
-    --gauge-glow: 45 93% 53%;
-    
-    --gradient-gold: linear-gradient(135deg, hsl(45, 93%, 53%) 0%, hsl(24, 95%, 53%) 100%);
-    --gradient-gold-soft: linear-gradient(135deg, hsl(45, 93%, 53%, 0.2) 0%, hsl(24, 95%, 53%, 0.2) 100%);
-    
-    --shadow-gold: 0 0 30px hsl(45, 93%, 53%, 0.3);
-    --shadow-gold-intense: 0 0 50px hsl(45, 93%, 53%, 0.5);
-    --shadow-card: 0 25px 50px -12px hsl(0, 0%, 0%, 0.8);
+    /* Signal colors */
+    --signal-low: 48 96% 53%;
+    --signal-mid: 38 92% 50%;
+    --signal-high: 0 84% 60%;
 
-    --sidebar-background: 0 0% 4%;
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(48, 96%, 53%, 0.25);
+    --shadow-glow-intense: 0 0 60px hsl(48, 96%, 53%, 0.4);
+    --shadow-card: 0 25px 50px -12px hsl(0, 0%, 0%, 0.9);
+
+    --sidebar-background: 0 0% 3%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 45 93% 53%;
+    --sidebar-primary: 48 96% 53%;
     --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent: 0 0% 10%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 12%;
-    --sidebar-ring: 45 93% 53%;
-  }
-
-  .dark {
-    --background: 0 0% 1%;
-    --foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 10%;
+    --sidebar-ring: 48 96% 53%;
   }
 }
 
@@ -74,145 +70,211 @@
 
   html {
     direction: rtl;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    overscroll-behavior: none;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Cairo', sans-serif;
+    touch-action: manipulation;
+    user-select: none;
   }
 }
 
 @layer components {
-  .gauge-container {
-    @apply relative flex justify-center items-center;
-    filter: drop-shadow(0 0 20px hsl(var(--primary) / 0.2));
-  }
-
-  .gauge-value {
-    @apply absolute text-center;
-  }
-
-  .gauge-value-number {
-    @apply text-7xl font-black tracking-tighter text-foreground;
-    text-shadow: 0 0 30px hsl(var(--primary) / 0.5);
-  }
-
-  .gauge-value-label {
-    @apply text-[10px] text-muted-foreground font-bold tracking-[0.5em];
-  }
-
-  .control-card {
-    @apply bg-card rounded-3xl p-4 border border-border;
-  }
-
-  .control-button {
-    @apply p-3 rounded-2xl bg-secondary border border-border 
-           transition-all duration-200 active:scale-95
-           hover:bg-muted hover:border-primary/20;
-  }
-
-  .control-button-primary {
-    @apply p-3 rounded-2xl bg-primary text-primary-foreground
-           transition-all duration-200 active:scale-95
-           shadow-[var(--shadow-gold)];
-  }
-
-  .status-badge {
-    @apply px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider;
-  }
-
-  .status-badge-success {
-    @apply bg-success/20 text-success border border-success/30;
-  }
-
-  .status-badge-warning {
-    @apply bg-primary/20 text-primary border border-primary/30;
-  }
-
-  .status-badge-muted {
-    @apply bg-muted text-muted-foreground border border-border;
-  }
-
-  .slider-track {
-    @apply h-2 bg-muted rounded-full overflow-hidden;
-  }
-
-  .slider-fill {
-    @apply h-full rounded-full transition-all duration-100;
-    background: var(--gradient-gold);
-  }
-
-  .info-grid {
-    @apply grid grid-cols-2 gap-3;
-  }
-
-  .info-item {
-    @apply bg-secondary rounded-2xl p-4 border border-border;
-  }
-
-  .info-item-label {
-    @apply text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1;
-  }
-
-  .info-item-value {
-    @apply text-lg font-black text-foreground;
-  }
-
-  .primary-action-button {
-    @apply w-full py-5 rounded-[2rem] font-black text-lg
-           flex items-center justify-center gap-3
-           transition-all duration-200 active:scale-[0.98];
-    background: var(--gradient-gold);
-    box-shadow: var(--shadow-gold);
-  }
-
+  /* Device Frame */
   .device-frame {
-    @apply w-full max-w-md bg-card rounded-[3rem] p-6 
+    @apply w-full max-w-md bg-card rounded-[3rem] p-5 
            border border-border relative overflow-hidden;
     box-shadow: var(--shadow-card);
   }
 
   .device-frame::before {
     content: '';
-    @apply absolute inset-0 opacity-5 pointer-events-none;
-    background: radial-gradient(ellipse at top, hsl(var(--primary)) 0%, transparent 60%);
+    @apply absolute inset-0 opacity-[0.03] pointer-events-none;
+    background: radial-gradient(ellipse at top, hsl(var(--primary)) 0%, transparent 50%);
   }
 
+  /* Gauge */
+  .gauge-container {
+    @apply relative flex justify-center items-center;
+  }
+
+  .gauge-value {
+    @apply absolute text-center flex flex-col items-center justify-center;
+  }
+
+  .gauge-value-number {
+    @apply text-7xl font-black tracking-tighter text-foreground leading-none;
+    font-family: 'JetBrains Mono', monospace;
+    text-shadow: 0 0 40px hsl(var(--primary) / 0.4);
+  }
+
+  .gauge-value-label {
+    @apply text-[10px] text-muted-foreground font-bold tracking-[0.4em] mt-1;
+  }
+
+  /* Signal Bar */
+  .signal-bar-container {
+    @apply h-3 bg-muted rounded-full overflow-hidden relative;
+  }
+
+  .signal-bar-fill {
+    @apply h-full rounded-full transition-all duration-100 ease-out;
+    background: linear-gradient(90deg, 
+      hsl(var(--signal-low)) 0%, 
+      hsl(var(--signal-mid)) 50%, 
+      hsl(var(--signal-high)) 100%
+    );
+  }
+
+  .signal-bar-glow {
+    @apply absolute inset-0 rounded-full opacity-50 blur-sm;
+    background: linear-gradient(90deg, 
+      hsl(var(--signal-low)) 0%, 
+      hsl(var(--signal-mid)) 50%, 
+      hsl(var(--signal-high)) 100%
+    );
+  }
+
+  /* Target ID Box */
+  .target-id-box {
+    @apply bg-secondary rounded-[1.5rem] p-4 border border-border text-center;
+  }
+
+  .target-id-label {
+    @apply text-[10px] text-muted-foreground font-bold uppercase tracking-[0.3em] mb-2;
+  }
+
+  .target-id-value {
+    @apply text-xl font-black;
+  }
+
+  .target-no-target { @apply text-muted-foreground; }
+  .target-iron { @apply text-destructive; }
+  .target-gold { @apply text-primary; }
+  .target-silver { @apply text-foreground; }
+
+  /* Control Cards */
+  .control-card {
+    @apply bg-secondary rounded-[1.5rem] p-4 border border-border;
+  }
+
+  .control-button {
+    @apply w-12 h-12 rounded-2xl bg-muted border border-border 
+           flex items-center justify-center
+           transition-all duration-150 active:scale-90
+           hover:bg-border hover:border-muted-foreground/20;
+  }
+
+  .control-button-primary {
+    @apply w-12 h-12 rounded-2xl bg-primary text-primary-foreground
+           flex items-center justify-center
+           transition-all duration-150 active:scale-90;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+
+  /* Slider */
+  .slider-track {
+    @apply h-2 bg-muted rounded-full overflow-hidden flex-1;
+  }
+
+  .slider-fill {
+    @apply h-full rounded-full transition-all duration-100 ease-out bg-primary;
+  }
+
+  /* Status Indicators */
+  .status-indicator {
+    @apply flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold;
+  }
+
+  .status-connected {
+    @apply bg-success/15 text-success border border-success/30;
+  }
+
+  .status-disconnected {
+    @apply bg-muted text-muted-foreground border border-border;
+  }
+
+  /* Info Grid */
+  .info-grid {
+    @apply grid grid-cols-2 gap-3;
+  }
+
+  .info-item {
+    @apply bg-secondary rounded-2xl p-3 border border-border;
+  }
+
+  .info-item-label {
+    @apply text-[9px] text-muted-foreground font-bold uppercase tracking-[0.2em] mb-0.5;
+  }
+
+  .info-item-value {
+    @apply text-base font-black text-foreground;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Buttons */
   .bluetooth-button {
-    @apply p-4 rounded-2xl border border-border transition-all duration-300
-           flex items-center gap-2;
+    @apply px-4 py-3 rounded-2xl border border-border transition-all duration-200
+           flex items-center gap-2 font-bold text-sm active:scale-95;
   }
 
-  .bluetooth-button-connected {
-    @apply bg-success/10 text-success border-success/30;
-    box-shadow: 0 0 20px hsl(var(--success) / 0.2);
+  .bluetooth-connected {
+    @apply bg-success/15 text-success border-success/30;
+    box-shadow: 0 0 25px hsl(var(--success) / 0.2);
   }
 
-  .bluetooth-button-disconnected {
-    @apply bg-secondary text-muted-foreground animate-pulse;
+  .bluetooth-disconnected {
+    @apply bg-secondary text-muted-foreground;
   }
 
+  .calibrate-button {
+    @apply w-full py-5 rounded-[1.5rem] font-black text-lg
+           flex items-center justify-center gap-3
+           bg-primary text-primary-foreground
+           transition-all duration-150 active:scale-[0.97];
+    box-shadow: var(--shadow-glow);
+  }
+
+  .calibrate-button:active {
+    box-shadow: var(--shadow-glow-intense);
+  }
+
+  .calibrate-button:disabled {
+    @apply opacity-50 cursor-not-allowed;
+    box-shadow: none;
+  }
+
+  /* Logo */
   .logo-badge {
-    @apply p-2.5 rounded-2xl;
-    background: var(--gradient-gold);
-    box-shadow: var(--shadow-gold);
+    @apply p-2.5 rounded-2xl bg-primary;
+    box-shadow: var(--shadow-glow);
   }
 
-  .target-indicator {
-    @apply flex items-center gap-2 px-4 py-2 rounded-full 
-           bg-secondary border border-border;
-  }
-
+  /* Divider */
   .section-divider {
-    @apply h-px bg-gradient-to-r from-transparent via-border to-transparent my-6;
+    @apply h-px bg-gradient-to-r from-transparent via-border to-transparent my-5;
   }
+
+  /* Ground Stability */
+  .stability-indicator {
+    @apply flex items-center gap-2;
+  }
+
+  .stability-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .stability-good { @apply bg-success; box-shadow: 0 0 8px hsl(var(--success)); }
+  .stability-medium { @apply bg-warning; box-shadow: 0 0 8px hsl(var(--warning)); }
+  .stability-poor { @apply bg-destructive; box-shadow: 0 0 8px hsl(var(--destructive)); }
 }
 
 @layer utilities {
-  .text-gradient-gold {
-    background: var(--gradient-gold);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .text-mono {
+    font-family: 'JetBrains Mono', monospace;
   }
 }
