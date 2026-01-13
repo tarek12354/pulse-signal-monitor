@@ -19,24 +19,23 @@ const ControlSlider: React.FC<ControlSliderProps> = ({
   onChange,
 }) => {
   const percentage = ((value - min) / (max - min)) * 100;
+  const step = (max - min) / 10;
 
   const handleDecrement = () => {
-    const step = (max - min) / 20;
     onChange(Math.max(min, value - step));
   };
 
   const handleIncrement = () => {
-    const step = (max - min) / 20;
     onChange(Math.min(max, value + step));
   };
 
   return (
     <div className="control-card">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider">
+        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.15em]">
           {label}
         </span>
-        <span className="text-sm font-black text-foreground">
+        <span className="text-sm font-black text-foreground text-mono">
           {Math.round(value)}{unit}
         </span>
       </div>
@@ -47,10 +46,10 @@ const ControlSlider: React.FC<ControlSliderProps> = ({
           className="control-button"
           aria-label="تقليل"
         >
-          <Minus size={16} />
+          <Minus size={18} className="text-muted-foreground" />
         </button>
         
-        <div className="flex-1 slider-track">
+        <div className="slider-track">
           <div 
             className="slider-fill" 
             style={{ width: `${percentage}%` }} 
@@ -62,7 +61,7 @@ const ControlSlider: React.FC<ControlSliderProps> = ({
           className="control-button"
           aria-label="زيادة"
         >
-          <Plus size={16} />
+          <Plus size={18} className="text-muted-foreground" />
         </button>
       </div>
     </div>

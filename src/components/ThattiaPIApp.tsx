@@ -4,8 +4,10 @@ import {
   Radio, Loader2, Wifi, WifiOff
 } from 'lucide-react';
 import SignalGauge from './SignalGauge';
+import SignalBar from './SignalBar';
 import ControlSlider from './ControlSlider';
-import TargetAnalysis from './TargetAnalysis';
+import TargetIDBox from './TargetIDBox';
+import InfoPanel from './InfoPanel';
 
 // Type definitions for Web Bluetooth API
 interface BluetoothDeviceType {
@@ -52,6 +54,9 @@ const ThattiaPIApp: React.FC = () => {
   const rawAdjusted = Math.max(0, signal - offset);
   const maxSignal = 30000 / (sensitivity / 100);
   const percentage = Math.min(100, (rawAdjusted / maxSignal) * 100);
+  
+  // Estimate depth based on signal strength
+  const estimatedDepth = percentage > 10 ? Math.round(35 - percentage * 0.3) : 0;
 
   // Audio feedback based on signal strength
   useEffect(() => {
@@ -84,7 +89,7 @@ const ThattiaPIApp: React.FC = () => {
     
     // Volume based on signal
     if (gainNodeRef.current) {
-      gainNodeRef.current.gain.setValueAtTime(percentage / 200, ctx.currentTime);
+      gainNodeRef.current.gain.setValueAtTime(percentage / 250, ctx.currentTime);
     }
 
     return () => {
@@ -101,10 +106,10 @@ const ThattiaPIApp: React.FC = () => {
     
     const interval = setInterval(() => {
       setGroundStability(prev => {
-        const change = (Math.random() - 0.5) * 10;
+        const change = (Math.random() - 0.5) * 8;
         return Math.max(0, Math.min(100, prev + change));
       });
-    }, 2000);
+    }, 1500);
 
     return () => clearInterval(interval);
   }, [isConnected]);
@@ -132,7 +137,7 @@ const ThattiaPIApp: React.FC = () => {
         return () => clearInterval(demoInterval);
       }
 
-      const selectedDevice = await navigator.bluetooth.requestDevice({
+      const selectedDevice = await (navigator.bluetooth as any).requestDevice({
         acceptAllDevices: true,
         optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb']
       });
@@ -190,7 +195,7 @@ const ThattiaPIApp: React.FC = () => {
     setOffset(signal);
     setGroundStability(100);
     
-    // Confirmation beep
+    // Confirmation beep using Web Audio API
     if (!audioCtxRef.current) {
       audioCtxRef.current = new AudioContext();
     }
@@ -202,12 +207,26 @@ const ThattiaPIApp: React.FC = () => {
     osc.connect(gain);
     gain.connect(ctx.destination);
     
-    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    // Double beep for confirmation
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
     gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
     
     osc.start();
-    osc.stop(ctx.currentTime + 0.15);
+    osc.stop(ctx.currentTime + 0.1);
+    
+    // Second beep
+    setTimeout(() => {
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.frequency.setValueAtTime(1100, ctx.currentTime);
+      gain2.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+      osc2.start();
+      osc2.stop(ctx.currentTime + 0.15);
+    }, 120);
   }, [signal]);
 
   const toggleAudio = () => {
@@ -219,19 +238,19 @@ const ThattiaPIApp: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-4 py-8">
+    <div className="flex flex-col items-center min-h-screen p-4 py-6">
       <div className="device-frame">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
             <div className="logo-badge">
-              <Radio className="text-primary-foreground" size={22} />
+              <Radio className="text-primary-foreground" size={20} />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-foreground tracking-tight">
+              <h1 className="text-xl font-black text-foreground tracking-tight">
                 THATTIA-PI
               </h1>
-              <span className="text-[9px] text-primary font-bold uppercase tracking-[0.2em]">
+              <span className="text-[8px] text-primary font-bold uppercase tracking-[0.15em]">
                 Pulse Induction
               </span>
             </div>
@@ -243,26 +262,28 @@ const ThattiaPIApp: React.FC = () => {
               className="control-button"
               aria-label={audioEnabled ? "كتم الصوت" : "تشغيل الصوت"}
             >
-              {audioEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+              {audioEnabled ? (
+                <Volume2 size={18} className="text-primary" />
+              ) : (
+                <VolumeX size={18} className="text-muted-foreground" />
+              )}
             </button>
             
             <button 
               onClick={isConnected ? disconnect : connectBluetooth}
               disabled={isConnecting}
               className={`bluetooth-button ${
-                isConnected 
-                  ? 'bluetooth-button-connected' 
-                  : 'bluetooth-button-disconnected'
+                isConnected ? 'bluetooth-connected' : 'bluetooth-disconnected'
               }`}
             >
               {isConnecting ? (
-                <Loader2 size={20} className="animate-spin" />
+                <Loader2 size={18} className="animate-spin" />
               ) : isConnected ? (
-                <Bluetooth size={20} />
+                <Bluetooth size={18} />
               ) : (
-                <BluetoothOff size={20} />
+                <BluetoothOff size={18} />
               )}
-              <span className="text-[10px] font-bold">
+              <span className="text-xs font-bold">
                 {isConnecting ? "جاري..." : isConnected ? "متصل" : "إقران"}
               </span>
             </button>
@@ -271,17 +292,19 @@ const ThattiaPIApp: React.FC = () => {
 
         {/* Connection Status */}
         <div className="flex justify-center mb-4">
-          <div className={`status-badge ${
-            isConnected ? 'status-badge-success' : 'status-badge-muted'
+          <div className={`status-indicator ${
+            isConnected ? 'status-connected' : 'status-disconnected'
           }`}>
             {isConnected ? (
-              <span className="flex items-center gap-1">
-                <Wifi size={12} /> متصل بالجهاز
-              </span>
+              <>
+                <Wifi size={12} />
+                <span>ESP32 متصل</span>
+              </>
             ) : (
-              <span className="flex items-center gap-1">
-                <WifiOff size={12} /> غير متصل
-              </span>
+              <>
+                <WifiOff size={12} />
+                <span>غير متصل</span>
+              </>
             )}
           </div>
         </div>
@@ -289,17 +312,23 @@ const ThattiaPIApp: React.FC = () => {
         {/* Main Gauge */}
         <SignalGauge percentage={percentage} />
 
-        {/* Target Analysis */}
-        <TargetAnalysis 
-          percentage={percentage}
+        {/* Horizontal Signal Bar */}
+        <SignalBar percentage={percentage} />
+
+        {/* Target ID Box */}
+        <TargetIDBox percentage={percentage} rawSignal={signal} />
+
+        {/* Info Panel */}
+        <InfoPanel 
           groundStability={groundStability}
           rawSignal={signal}
+          depth={estimatedDepth}
         />
 
         <div className="section-divider" />
 
         {/* Controls */}
-        <div className="space-y-3 mb-6">
+        <div className="space-y-3 mb-5">
           <ControlSlider
             label="الحساسية"
             value={sensitivity}
@@ -322,17 +351,17 @@ const ThattiaPIApp: React.FC = () => {
         {/* Calibrate Button */}
         <button 
           onClick={handleCalibrate}
-          className="primary-action-button text-primary-foreground"
+          className="calibrate-button"
           disabled={!isConnected}
         >
-          <RefreshCw size={24} />
+          <RefreshCw size={22} />
           معايرة التربة
         </button>
 
         {/* Footer */}
-        <div className="mt-6 text-center">
-          <p className="text-[10px] text-muted-foreground">
-            الإصدار 2.0 • نظام كشف المعادن بالنبض الحثي
+        <div className="mt-5 text-center">
+          <p className="text-[9px] text-muted-foreground">
+            v2.0 • نظام كشف المعادن بالنبض الحثي
           </p>
         </div>
       </div>
