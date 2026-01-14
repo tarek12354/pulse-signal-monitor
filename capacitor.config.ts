@@ -4,7 +4,9 @@ const config: CapacitorConfig = {
   appId: 'com.thattia.pulse',
   appName: 'THATTIA-PI',
   webDir: 'dist',
-  bundledWebRuntime: false
+  server: {
+    androidScheme: 'https'
+  }
 };
 
 export default config;
