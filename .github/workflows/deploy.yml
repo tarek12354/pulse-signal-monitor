@@ -27,11 +27,17 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      - name: Android Build Prep
+      - name: Create Android Folder if missing
         run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
           npx cap sync
-          # التأكد من الدخول للمجلد الصحيح وإعطاء صلاحيات البناء
-          cd android && chmod +x gradlew
+
+      - name: Android Build
+        run: |
+          cd android
+          chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Upload APK
