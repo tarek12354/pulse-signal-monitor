@@ -29,10 +29,11 @@ jobs:
 
       - name: Initialize Android Platform
         run: |
+          # حذف المجلد القديم لضمان نظافة البناء
           rm -rf android
-          # إنشاء المنصة بمعرف صالح لا يحتوي على أرقام مخالفة أو شرطات
+          # تهيئة المشروع باسم حزمة صالح com.pulse.monitor
           npx cap add android
-          npx cap init THATTIA-PI com.thattiapi.app --web-dir dist
+          npx cap init "Pulse Monitor" com.pulse.monitor --web-dir dist
           npx cap sync
 
       - name: Android Build
@@ -44,5 +45,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: THATTIA-PI-Final-APK
+          name: Pulse-Monitor-Final-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
