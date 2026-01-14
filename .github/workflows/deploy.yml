@@ -12,7 +12,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22' # تم التحديث هنا ليقبل Capacitor الجديد
+          node-version: '22'
           cache: 'npm'
 
       - name: Install Dependencies
@@ -30,7 +30,9 @@ jobs:
       - name: Android Build Prep
         run: |
           npx cap sync
-          cd android && chmod +x gradlew && ./gradlew assembleDebug
+          # التأكد من الدخول للمجلد الصحيح وإعطاء صلاحيات البناء
+          cd android && chmod +x gradlew
+          ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
