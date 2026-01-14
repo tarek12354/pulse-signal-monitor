@@ -1,50 +1,23 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { 
   RefreshCw, Bluetooth, BluetoothOff, Volume2, VolumeX,
-  Radio, Loader2, Wifi, WifiOff
+  Radio, Loader2, Wifi, WifiOff, Smartphone
 } from 'lucide-react';
 import SignalGauge from './SignalGauge';
 import SignalBar from './SignalBar';
 import ControlSlider from './ControlSlider';
 import TargetIDBox from './TargetIDBox';
 import InfoPanel from './InfoPanel';
-
-// Type definitions for Web Bluetooth API
-interface BluetoothDeviceType {
-  id: string;
-  name?: string;
-  gatt?: {
-    connected: boolean;
-    connect(): Promise<BluetoothGATTServerType>;
-    disconnect(): void;
-  };
-  addEventListener(type: string, listener: () => void): void;
-}
-
-interface BluetoothGATTServerType {
-  getPrimaryService(service: string): Promise<BluetoothGATTServiceType>;
-}
-
-interface BluetoothGATTServiceType {
-  getCharacteristic(characteristic: string): Promise<BluetoothGATTCharacteristicType>;
-}
-
-interface BluetoothGATTCharacteristicType {
-  value?: DataView;
-  startNotifications(): Promise<BluetoothGATTCharacteristicType>;
-  addEventListener(type: string, listener: (event: Event) => void): void;
-}
+import { useBluetooth } from '@/hooks/useBluetooth';
 
 const ThattiaPIApp: React.FC = () => {
-  const [signal, setSignal] = useState(0);
+  const { signal, isConnected, isConnecting, connect, disconnect, isDemo } = useBluetooth();
+  
   const [frequency, setFrequency] = useState(100);
   const [sensitivity, setSensitivity] = useState(80);
   const [offset, setOffset] = useState(0);
-  const [isConnected, setIsConnected] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
   const [groundStability, setGroundStability] = useState(100);
   const [audioEnabled, setAudioEnabled] = useState(true);
-  const [device, setDevice] = useState<BluetoothDeviceType | null>(null);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const oscillatorRef = useRef<OscillatorNode | null>(null);
@@ -113,83 +86,6 @@ const ThattiaPIApp: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [isConnected]);
-
-  const connectBluetooth = async () => {
-    if (isConnecting) return;
-    
-    setIsConnecting(true);
-    
-    try {
-      // Check if Web Bluetooth is supported
-      if (!navigator.bluetooth) {
-        // Demo mode for unsupported browsers
-        setIsConnected(true);
-        setIsConnecting(false);
-        
-        // Simulate signal data in demo mode
-        const demoInterval = setInterval(() => {
-          setSignal(prev => {
-            const change = (Math.random() - 0.3) * 2000;
-            return Math.max(0, Math.min(30000, prev + change));
-          });
-        }, 100);
-        
-        return () => clearInterval(demoInterval);
-      }
-
-      const selectedDevice = await (navigator.bluetooth as any).requestDevice({
-        acceptAllDevices: true,
-        optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb']
-      });
-
-      const server = await selectedDevice.gatt?.connect();
-      const service = await server?.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-      const characteristic = await service?.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-
-      setDevice(selectedDevice);
-      setIsConnected(true);
-
-      characteristic?.startNotifications();
-      characteristic?.addEventListener('characteristicvaluechanged', (event: Event) => {
-        const target = event.target as unknown as BluetoothGATTCharacteristicType;
-        if (target.value) {
-          const value = new TextDecoder().decode(target.value);
-          const numValue = parseInt(value.trim());
-          if (!isNaN(numValue)) setSignal(numValue);
-        }
-      });
-
-      selectedDevice.addEventListener('gattserverdisconnected', () => {
-        setIsConnected(false);
-        setDevice(null);
-        setSignal(0);
-      });
-
-    } catch (error) {
-      console.error("خطأ في الاتصال:", error);
-      
-      // Fallback to demo mode on error
-      setIsConnected(true);
-      const demoInterval = setInterval(() => {
-        setSignal(prev => {
-          const change = (Math.random() - 0.3) * 2000;
-          return Math.max(0, Math.min(30000, prev + change));
-        });
-      }, 100);
-      
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
-  const disconnect = () => {
-    if (device?.gatt?.connected) {
-      device.gatt.disconnect();
-    }
-    setIsConnected(false);
-    setDevice(null);
-    setSignal(0);
-  };
 
   const handleCalibrate = useCallback(() => {
     setOffset(signal);
@@ -270,7 +166,7 @@ const ThattiaPIApp: React.FC = () => {
             </button>
             
             <button 
-              onClick={isConnected ? disconnect : connectBluetooth}
+              onClick={isConnected ? disconnect : connect}
               disabled={isConnecting}
               className={`bluetooth-button ${
                 isConnected ? 'bluetooth-connected' : 'bluetooth-disconnected'
@@ -297,8 +193,8 @@ const ThattiaPIApp: React.FC = () => {
           }`}>
             {isConnected ? (
               <>
-                <Wifi size={12} />
-                <span>ESP32 متصل</span>
+                {isDemo ? <Smartphone size={12} /> : <Wifi size={12} />}
+                <span>{isDemo ? 'وضع العرض' : 'ESP32 متصل'}</span>
               </>
             ) : (
               <>
@@ -361,7 +257,7 @@ const ThattiaPIApp: React.FC = () => {
         {/* Footer */}
         <div className="mt-5 text-center">
           <p className="text-[9px] text-muted-foreground">
-            v2.0 • نظام كشف المعادن بالنبض الحثي
+            v2.1 • Capacitor + BLE
           </p>
         </div>
       </div>
