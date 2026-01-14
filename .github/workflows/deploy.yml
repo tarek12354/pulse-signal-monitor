@@ -27,12 +27,16 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      - name: Android Build
+      - name: Force Android Rebuild
         run: |
-          # حذف أي إعدادات قديمة وبناء المنصة من جديد بالمعرف الصحيح
+          # مسح أي إعدادات سابقة تسبب تعارض
           rm -rf android
+          # إضافة المنصة من جديد باستخدام المعرف الصحيح
           npx cap add android
           npx cap sync
+
+      - name: Android Build
+        run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
@@ -40,5 +44,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: THATTIA-PI-Final-APK
+          name: THATTIA-PI-FINAL-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
