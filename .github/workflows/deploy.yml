@@ -29,9 +29,10 @@ jobs:
 
       - name: Initialize Android Platform
         run: |
-          # حذف أي مجلد أندرويد قديم وإعادة بنائه لضمان وجود الملفات
           rm -rf android
+          # إنشاء المنصة بمعرف صالح لا يحتوي على أرقام مخالفة أو شرطات
           npx cap add android
+          npx cap init THATTIA-PI com.thattiapi.app --web-dir dist
           npx cap sync
 
       - name: Android Build
