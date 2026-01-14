@@ -27,11 +27,11 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      - name: Create Android Folder if missing
+      - name: Initialize Android Platform
         run: |
-          if [ ! -d "android" ]; then
-            npx cap add android
-          fi
+          # حذف أي مجلد أندرويد قديم وإعادة بنائه لضمان وجود الملفات
+          rm -rf android
+          npx cap add android
           npx cap sync
 
       - name: Android Build
