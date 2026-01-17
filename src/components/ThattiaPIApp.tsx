@@ -23,15 +23,15 @@ const ThattiaPIApp: React.FC = () => {
   const oscillatorRef = useRef<OscillatorNode | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
 
-  // Calculate adjusted signal - ESP32 sends values 0-100 typically
-  // Apply offset and sensitivity scaling
-  const rawAdjusted = Math.max(0, signal - offset);
-  // Scale based on sensitivity: higher sensitivity = lower max threshold
-  const maxSignal = 100 * (100 / sensitivity);
-  const percentage = Math.min(100, Math.max(0, (rawAdjusted / maxSignal) * 100));
+  // Calculate adjusted signal - ESP32 sends high values (~20,000+)
+  // After calibration, offset becomes the baseline and we show the difference
+  const rawAdjusted = Math.abs(signal - offset);
   
-  // Debug log to verify signal flow
-  console.log('Signal:', signal, 'Adjusted:', rawAdjusted, 'Percentage:', percentage);
+  // Dynamic scaling: sensitivity controls how much change is needed for full scale
+  // At 100% sensitivity, a change of 500 from baseline = 100% gauge
+  // At 50% sensitivity, a change of 1000 from baseline = 100% gauge
+  const fullScaleRange = 1000 * (100 / sensitivity);
+  const percentage = Math.min(100, Math.max(0, (rawAdjusted / fullScaleRange) * 100));
   
   // Estimate depth based on signal strength
   const estimatedDepth = percentage > 10 ? Math.round(35 - percentage * 0.3) : 0;
