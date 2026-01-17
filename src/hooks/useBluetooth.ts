@@ -2,8 +2,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { BleClient, dataViewToText } from '@capacitor-community/bluetooth-le';
 
 // ESP32 Service and Characteristic UUIDs
-const ESP32_SERVICE_UUID = '0000ffe0-0000-1000-8000-00805f9b34fb';
-const ESP32_CHARACTERISTIC_UUID = '0000ffe1-0000-1000-8000-00805f9b34fb';
+const ESP32_SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+const ESP32_CHARACTERISTIC_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
 
 interface UseBluetoothReturn {
   signal: number;
